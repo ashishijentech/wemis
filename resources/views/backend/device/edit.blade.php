@@ -1,0 +1,1223 @@
+@extends($layout)
+@section('content')
+    <div class="container-fluid">
+
+        <div class="align-items-center row"
+            style="background: linear-gradient(135deg, #2a0b5a 0%, #1a0638 100%); padding: 12px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <i class="me-3 text-white fas fa-map-marked-alt fs-4"></i>
+                    <h4 class="mb-0 text-white card-title" style="font-weight: 600; letter-spacing: 0.5px;">Edit Map Devices
+                    </h4>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-md-end justify-content-sm-start">
+                    <a href="" class="btn btn-primary">Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container-fluid">
+        <form action="{{ route('map.device.update',$deviceId = $device->id) }}" method="post" enctype="multipart/form-data">
+            <!-- RFC Header -->
+            @csrf
+            <div class="m-3 border border-secondary rounded">
+                <div class="bg-light p-2 border rounded-top">
+                    <h5 class="mb-0 text-center">RFC Info</h5>
+                </div>
+                {{-- {{ $device }} --}}
+                <!-- Form Body -->
+                <div class="p-3 border rounded">
+                    <div class="row">
+                        @if (Auth::guard('manufacturer')->check())
+                            <!-- Country Dropdown -->
+                            <div class="form-group col-md-3">
+                                <label for="country">Country<span class="text-danger badge">*</span></label>
+                                <select name="country" class="form-select-sm form-select country">
+                                    <option disabled @selected(true)>Choose Country
+                                    </option>
+                                    <option value="china" @selected($device->dealer->distributor->country == 'china')>China
+                                    </option>
+                                    <option value="india" @selected($device->dealer->distributor->country == 'india')>India
+                                    </option>
+                                </select>
+                                @error('country')
+                                    <div class="d-block invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- State Dropdown -->
+                            <div class="form-group col-md-3">
+                                <label for="state">State</label> <span class="text-danger badge">*</span>
+                                <select class="form-select-sm form-select state" name="state" id=""></select>
+                                @error('state')
+                                    <div class="d-block invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Distributor Dropdown -->
+
+                            <div class="form-group col-md-3">
+                                <label for="distributor">Distributor</label><span class="text-danger badge">*</span>
+                                <Select class="form-select-sm form-select distributor" name="distributor">
+                                    <option value="">Select Distributor</option>
+                                </Select>
+                                @error('distributor')
+                                    <div class="d-block invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+
+                            <!-- Dealer Dropdown -->
+                            <div class="form-group col-md-3">
+                                <label for="dealer">Dealer </label><span class="text-danger badge">*</span>
+                                <Select class="form-select-sm form-select dealer" name="dealer">
+                                    <option value="">Select Dealer</option>
+                                </Select>
+                                @error('dealer')
+                                    <div class="d-block invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        @elseif (Auth::guard('distributor')->check())
+                            <div class="form-group col-md-3">
+                                <label for="distributor">Dealer<span class="text-danger badge">*</span>
+                                    <Select class="form-select-sm form-select dealer" name="dealer">
+                                        <option selected disabled>Select Dealer</option>
+                                        @foreach ($dealers as $item)
+                                            <option value="{{ $item->id }}" country="{{ $item->country }}"
+                                                state="{{ $item->state }}" dis="{{ $item->district }}"
+                                                rto='@json($item->rto_devision)'>
+                                                {{ $item->business_name }}
+                                            </option>
+                                        @endforeach
+                                    </Select>
+                                    @error('distributor')
+                                        <div class="d-block invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                            </div>
+                        @elseif (Auth::guard('dealer')->check())
+                            <div class="form-group col-md-3">
+                                <label for="distributor">Dealer<span class="text-danger badge">*</span>
+                                    <Select class="form-select-sm form-select dealer" name="dealer">
+                                        <option selected disabled>Select Dealer</option>
+                                        <option value="{{ auth()->user()->id }}" country="{{ $item->country }}"
+                                            state="{{ $item->state }}" dis="{{ $item->district }}"
+                                            rto='@json($item->rto_devision)' readonly>
+                                            {{ auth()->user()->business_name }}
+                                        </option>
+                                    </Select>
+                                    @error('dealer')
+                                        <div class="d-block invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                            </div>
+                        @else
+                            <div class="form-group col-md-3">
+                                <label for="distributor">Dealer<span class="text-danger badge">*</span>
+                                    <Select class="form-select-sm form-select dealer" name="dealer">
+                                        <option selected disabled>Select Dealer</option>
+                                        <option value="{{ $dealer }}" country="{{ $item->country }}"
+                                            state="{{ $item->state }}" dis="{{ $item->district }}"
+                                            rto='@json($item->rto_devision)' readonly>
+                                            {{ $dealer->business_name }}
+                                        </option>
+                                    </Select>
+                                    @error('dealer')
+                                        <div class="d-block invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <div class="m-3 border border-secondary rounded">
+                <!-- Device Info Header -->
+                <div class="bg-light p-2 border rounded-top">
+                    <h5 class="mb-0 text-center">Device Info</h5>
+                </div>
+
+                <!-- Form Body -->
+                <div class="p-2 border rounded">
+                    <div class="row">
+                        <!-- Device Type Dropdown -->
+                        <div class="form-group col-md-4">
+                            <label for="deviceType">Device Type </label><span class="text-danger badge">*</span>
+                            <select id="deviceType" name="deviceType" class="form-select-sm form-select">
+                                <option>Select Device Type</option>
+                                <option value="New">New</option>
+                                <option value="Renewal">Renewal</option>
+                                <!-- Add more device types here if needed -->
+                            </select>
+                            @error('deviceType')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Device No Dropdown -->
+                        <div class="form-group col-md-4">
+                            <label for="deviceNo">Device No</label><span class="text-danger badge">*</span>
+                            <select name="deviceNo" class="form-select-sm form-select deviceno">
+                                <option>Select Device Number</option>>
+                                <!-- Add more device numbers here if needed -->
+                            </select>
+                            @error('deviceNo')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+
+                        </div>
+
+                        <!-- Voltage Input (disabled) -->
+                        <div class="form-group col-md-4">
+                            <label for="voltage">Voltage</label>
+                            <input type="text" class="form-control form-control-sm voltage" name="voltage"
+                                placeholder="" readonly>
+                            @error('voltage')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Element Type Input (disabled) -->
+                        <div class="form-group col-md-4">
+                            <label for="elementType">Element Type</label>
+                            <input type="text" class="form-control form-control-sm element_type" id="elementType"
+                                name="elementType" placeholder="" readonly>
+                        </div>
+
+                        <!-- Batch No Input (disabled) -->
+                        <div class="form-group col-md-4">
+                            <label for="batchNo">Batch No.</label>
+                            <input type="text" class="form-control form-control-sm batch_no" id="batchNo"
+                                name="batchNo" placeholder="" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="m-3 border border-secondary rounded">
+                <!-- Device Info Header -->
+                <div class="bg-light p-2 border rounded-top">
+                    <h5 class="mb-0 text-center">SIM Info</h5>
+                </div>
+
+                <!-- Form Body -->
+                <div class="p-2 border rounded simInfo">
+                </div>
+            </div>
+
+            <div class="m-3 border border-secondary rounded">
+                <div class="bg-light p-2 border rounded-top">
+                    <h5 class="mb-0 text-center">
+                        Vehicle Info
+                    </h5>
+                </div>
+                <div class="p-3 border rounded">
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label for="vehicleBirth">Vehicle Birth<span class="text-danger badge">*</span></label>
+                            <select id="vehicleBirth" name="vehicleBirth" class="form-select-sm form-select">
+                                <option selected value="Old" @selected($device->vehicle_birth == 'Old')>Old</option>
+                                <option value="New" @selected($device->vehicle_birth == 'New')>New</option>
+                            </select>
+                            @error('vehicleBirth')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4" id="vaicleregNumber">
+                            <label for="regNumber">Registration No.<span class="text-danger badge">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="regNumber" name="regNumber"
+                                placeholder="Enter Registration Number"
+                                value="{{ $device->vehicle_registration_number }}">
+                            @error('regNumber')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4" id="vaicledate">
+                            <label for="date">Date<span class="text-danger badge">*</span></label>
+                            <input type="date" class="form-control form-control-sm" id="date" name="regdate"
+                                value="{{ $device->date }}">
+                            @error('date')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="chassisNumber">Chassis Number<span class="text-danger badge">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="chassisNumber"
+                                name="chassisNumber" placeholder="Enter Chassis Number"
+                                value="{{ $device->vehicle_chassis_no }}">
+                            @error('chassisNumber')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="engineNumber">Engine Number<span class="text-danger badge">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="engineNumber"
+                                name="engineNumber" placeholder="Enter Engine Number"
+                                value="{{ $device->vehicle_engine_no }}">
+                            @error('engineNumber')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="vehicleType">Vehicle Type<span class="text-danger badge">*</span></label>
+                            <select id="vehicleType" name="vehicleType" class="form-control form-control-sm">
+                                <option selected>Choose Vehicle Type</option>
+                                <option value="AUTO" @selected($device->vehicle_type == 'AUTO')>AUTO</option>
+                                <option value="BUS" @selected($device->vehicle_type == 'BUS')>BUS</option>
+                                <option value="JCB" @selected($device->vehicle_type == 'JCB')>JCB</option>
+                                <option value="MAXI CAB" @selected($device->vehicle_type == 'MAXI CAB')>MAXI CAB</option>
+                                <option value="OIL TANK" @selected($device->vehicle_type == 'OIL TANK')>OIL TANK</option>
+                                <option value="PICKUP" @selected($device->vehicle_type == 'PICKUP')>PICKUP</option>
+                                <option value="SCHOOL BUS" @selected($device->vehicle_type == 'SCHOOL BUS')>SCHOOL BUS</option>
+                                <option value="TANK TRUCK" @selected($device->vehicle_type == 'TANK TRUCK')>TANK TRUCK</option>
+                                <option value="TAXI" @selected($device->vehicle_type == 'TAXI')>TAXI</option>
+                                <option value="TEMPO" @selected($device->vehicle_type == 'TEMPO')>TEMPO</option>
+                                <option value="TRACTOR" @selected($device->vehicle_type == 'TRACTOR')>TRACTOR</option>
+                                <option value="TRAILER TRUCK" @selected($device->vehicle_type == 'TRAILER TRUCK')>TRAILER TRUCK</option>
+                                <option value="TRAVILER" @selected($device->vehicle_type == 'TRAVILER')>TRAVILER</option>
+                                <option value="TRUCK" @selected($device->vehicle_type == 'TRUCK')>TRUCK</option>
+                            </select>
+                            @error('vehicleType')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="makeModel">Make & Model<span class="text-danger badge">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="vaiModel" name="vaiclemodel"
+                                placeholder="Enter Make & Model" value="{{ $device->vehicle_make_model }}">
+                            @error('vaiclemodel')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="modelYear">Model Year<span class="text-danger badge">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="modelYear"
+                                name="vaimodelyear" placeholder="Enter Model Year"
+                                value="{{ $device->vehicle_model_year }}">
+                            @error('vaimodelyear')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group col-md-4">
+                            <label for="insurance">Insu. Renew date</label>
+                            <input type="date" class="form-control form-control-sm" id="insurance"
+                                name="vaicleinsurance" value="{{ $device->vehicle_insurance_renew_date }}">
+                            @error('vaicleinsurance')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="panicButton">Pollution Renew date</label>
+                            <input type="date" class="form-control" id="panicButton" name="pollutiondate"
+                                value="{{ $device->vehicle_pollution_renew_date }}">
+                            @error('pollutiondate')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="m-3 border border-secondary rounded">
+                <div class="bg-light p-3 border rounded-top">
+                    <h5 class="mb-0 text-center">Customer Info</h5>
+                </div>
+                <div class="p-3 border rounded">
+                    <div class="mb-4 row g-3">
+                        <!-- Customer Name -->
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="shadow-sm form-control" id="customerName"
+                                    name="customerName" placeholder="Enter Name"
+                                    value="{{ $device->cusmtomer->customer_name }}">
+                                <label for="customerName" class="text-muted small">Full Name <span
+                                        class="text-danger">*</span></label>
+                                @error('customerName')
+                                    <div class="d-block invalid-feedback small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Customer Email -->
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="email" class="shadow-sm form-control" id="email" name="customerEmail"
+                                    placeholder="Enter Email" value="{{ $device->cusmtomer->customer_email }}">
+                                <label for="email" class="text-muted small">Email Address</label>
+                                @error('customerEmail')
+                                    <div class="d-block invalid-feedback small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Customer Mobile -->
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="tel" class="shadow-sm form-control" id="mobile"
+                                    name="customerMobile" placeholder="Enter Mobile"
+                                    value="{{ $device->cusmtomer->customer_mobile }}" autocomplete="off">
+                                <label for="mobile" class="text-muted small">Mobile Number <span
+                                        class="text-danger">*</span></label>
+                                @error('customerMobile')
+                                    <div class="d-block invalid-feedback small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- GSTIN Number -->
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="shadow-sm form-control" id="gstin" name="customergstin"
+                                    placeholder="Enter GSTIN" value="{{ $device->cusmtomer->customer_gst_no }}">
+                                <label for="gstin" class="text-muted small">GSTIN Number</label>
+                                @error('customergstin')
+                                    <div class="d-block invalid-feedback small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Country -->
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="bg-light shadow-sm form-control" name="country"
+                                    id="country" value="" readonly autocomplete="off" onkeydown="return false;">
+                                <label for="country" class="text-muted small">Country <span
+                                        class="text-danger">*</span></label>
+                                @error('country')
+                                    <div class="d-block invalid-feedback small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- State -->
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="bg-light shadow-sm form-control" name="state"
+                                    id="state" value="{{ old('state') }}" readonly autocomplete="off"
+                                    onkeydown="return false;">
+                                <label for="state" class="text-muted small">State/Region <span
+                                        class="text-danger">*</span></label>
+                                @error('state')
+                                    <div class="d-block invalid-feedback small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4 row g-3">
+                        <!-- District -->
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="bg-light shadow-sm form-control" name="coustomerDistrict"
+                                    id="district" value="{{ old('coustomerDistrict') }}" readonly autocomplete="off"
+                                    onkeydown="return false;">
+                                <label for="district" class="text-muted small">District <span
+                                        class="text-danger">*</span></label>
+                                @error('coustomerDistrict')
+                                    <div class="d-block invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- RTO Division -->
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="shadow-sm form-select" name="rto_devision" id="rto_division">
+                                    <option value="" selected disabled hidden>Select RTO Division
+                                    </option>
+                                    <!-- Options will be populated dynamically -->
+                                </select>
+                                <label for="rto_division" class="text-muted small">RTO Division <span
+                                        class="text-danger">*</span></label>
+                                @error('rto_division')
+                                    <div class="d-block invalid-feedback">{{ $message }}</div>
+                                @enderror
+
+                            </div>
+                        </div>
+
+                        <!-- Pin Code -->
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="shadow-sm form-control" name="coustomerPincode"
+                                    id="pincode" value="{{ $device->cusmtomer->customer_pincode }}">
+                                <label for="pincode" class="text-muted small">Pin Code <span
+                                        class="text-danger">*</span></label>
+                                @error('coustomerPincode')
+                                    <div class="d-block invalid-feedback small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="col-md-8">
+                            <div class="form-floating">
+                                <input type="text" class="shadow-sm form-control" id="address"
+                                    name="coustomeraddress" placeholder=" "
+                                    value="{{ $device->cusmtomer->customer_address }}">
+                                <label for="address" class="text-muted small">Complete Address <span
+                                        class="text-danger">*</span></label>
+                                @error('coustomeraddress')
+                                    <div class="d-block invalid-feedback small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Aadhaar -->
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="shadow-sm form-control" id="aadhaar"
+                                    name="customeraadhar" placeholder=" "
+                                    value="{{ $device->cusmtomer->customer_aadhaar }}">
+                                <label for="aadhaar" class="text-muted small">Aadhaar Number <span
+                                        class="text-danger">*</span></label>
+                                @error('customeraadhar')
+                                    <div class="d-block invalid-feedback small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- PAN Number -->
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="shadow-sm form-control" id="panNo" name="customerpanno"
+                                    placeholder=" " value="{{ $device->cusmtomer->customer_pan }}">
+                                <label for="panNo" class="text-muted small">PAN Number <span
+                                        class="text-danger">*</span></label>
+                                @error('customerpanno')
+                                    <div class="d-block invalid-feedback small">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="m-3 border border-secondary rounded">
+                <div class="bg-light p-2 border rounded-top">
+                    <h5 class="mb-0 text-center">Packages</h5>
+                </div>
+                <div class="p-3 border rounded">
+                    <div class="justify-content-center row">
+                        @foreach ($subscriptions as $item)
+                            @if ($item->id == $device->package_id)
+                                <div class="mb-2 col-md-3 Packages">
+                                    <div class="shadow-sm h-100 text-center select-subscription" data-id=""
+                                        style="width: 100%; cursor: pointer;">
+                                        <!-- Added cursor:pointer for click indication -->
+
+
+                                        <div class="card-body"
+                                            style="background-color: green; color: white; border-radius: 5px;">
+                                            <div class="d-flex justify-content-between">
+                                                <h5 class="card-title fw-bold">{{ $item->packageName }}</h5>
+                                                <span class="packageId" hidden>{{ $item->id }}</span>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="me-1 bi bi-clock"></i>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                            <h5 class="mt-2"><i class="fa-solid fa-indian-rupee-sign"></i>
+                                                {{ $item->price }}</h5>
+                                            <p class="text-white">{{ $item->billingCycle }}</p>
+                                            {{-- <p class="card-text">{{$item->description}}</p> --}}
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="mb-2 col-md-3 Packages">
+                                    <div class="shadow-sm h-100 text-center select-subscription" data-id=""
+                                        style="width: 100%; cursor: pointer;">
+                                        <!-- Added cursor:pointer for click indication -->
+
+
+                                        <div class="card-body"
+                                            style="background-color: blue; color: white; border-radius: 5px;">
+                                            <div class="d-flex justify-content-between">
+                                                <h5 class="card-title fw-bold">{{ $item->packageName }}</h5>
+                                                <span class="packageId" hidden>{{ $item->id }}</span>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="me-1 bi bi-clock"></i>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                            <h5 class="mt-2"><i class="fa-solid fa-indian-rupee-sign"></i>
+                                                {{ $item->price }}</h5>
+                                            <p class="text-white">{{ $item->billingCycle }}</p>
+                                            {{-- <p class="card-text">{{$item->description}}</p> --}}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                    @error('subscriptionpackage')
+                        <div class="d-block invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <input type="hidden" name="subscriptionpackage" id="subscriptionpackage"
+                        value="{{ $device->subscription_id }}">
+                </div>
+
+            </div>
+            <div class="m-3 border border-secondary rounded">
+                <div class="bg-light p-3 border rounded-top">
+                    <div class="align-items-center row">
+                        <!-- Technician Info Title -->
+                        <div class="text-center col-md-6">
+                            <h5>Technician Info</h5>
+                        </div>
+
+                        <!-- Select Technician Dropdown -->
+                        <div class="col-md-3">
+                            <select class="form-select-sm form-select technician" name="technician">
+                                <option selected disabled>Select Technician</option>
+                            </select>
+                            @error('technician')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Add Technician Button -->
+                        <div class="text-end col-md-3">
+                            {{-- <button type="button" class="btn" data-bs-toggle="modal"
+                                            data-bs-target="#addTechnician" style="background-color: #260950;color:#fff">
+                                            Add Technician
+                                        </button> --}}
+                        </div>
+                    </div>
+                </div>
+                <div class="p-2 row">
+                    <div class="form-group col-md-4">
+                        <label for="firstName" class="form-label">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" id="technician_name" name="name"
+                            placeholder="First Name" require readonly autocomplete="off">
+
+                        @error('name')
+                            <div class="d-block invalid-feedback">{{ $message }}</div>
+                        @enderror
+
+                    </div>
+                    {{-- <div class="form-group col-md-4">
+                                    <label for="lastName" class="form-label">Last Name <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" id="lastName"
+                                        name="techlastName" placeholder="Last Name" require>
+                                </div> --}}
+                    <div class="form-group col-md-4">
+                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" id="technician_email"
+                            name="techemail" placeholder="Email" readonly autocomplete="off">
+                    </div>
+                    {{-- <div class="form-group col-md-4">
+                                    <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" id="Gender" name="techgender"
+                                        placeholder="Gender">
+                                </div> --}}
+                    <div class="form-group col-md-4">
+                        <label for="mobile" class="form-label">Mobile <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" id="technician_mobile"
+                            name="techmobile" placeholder="Mobile" readonly autocomplete="off">
+                    </div>
+                    {{-- <div class="form-group col-md-4">
+                                    <label for="dob" class="form-label">Date Of Birth</label>
+                                    <input type="date" class="form-control form-control-sm" id="dob" name="techdob"
+                                        placeholder="Date Of Birth">
+                                </div> --}}
+                </div>
+            </div>
+
+
+
+            <div class="m-3 border border-secondary rounded">
+                <div class="bg-light p-2 border rounded-top">
+                    <h5 class="mb-0 text-center">Installation Detail</h5>
+                </div>
+                <div class="p-3 border rounded">
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label for="InvoiceNo" class="form-label">Invoice No<span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="InvoiceNo" name="InvoiceNo"
+                                value="{{ $device->invoice_no }}">
+                            @error('InvoiceNo')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="Vehicle KM Reading" class="form-label">Vehicle KM
+                                Reading<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="VehicleKMReading"
+                                name="VehicleKMReading" value="{{ $device->vehicle_km_reading }}">
+                            @error('VehicleKMReading')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="Driver License No" class="form-label">Driver License
+                                No<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="DriverLicenseNo"
+                                name="DriverLicenseNo" value="{{ $device->driver_license_no }}">
+                            @error('DriverLicenseNo')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="Mapped Date" class="form-label">Mapped Date<span
+                                    class="text-danger">*</span></label>
+                            <input type="date" class="form-control form-control-sm" id="MappedDate" name="MappedDate"
+                                value="{{ $device->mapped_date }}">
+                            @error('MappedDate')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="No Of Panic Buttons" class="form-label">No Of Panic
+                                Buttons<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="NoOfPanicButtons"
+                                name="NoOfPanicButtons" value="{{ $device->no_of_panic_buttons }}">
+                            @error('NoOfPanicButtons')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="m-3 border border-secondary rounded">
+                <div class="bg-light p-2 border rounded-top">
+                    <h5 class="mb-0 text-center">Vehicle Document (* document)</h5>
+                </div>
+                <div class="p-3 border rounded">
+                    <p class="mb-2 text-danger text-center small">
+                        * File types supported: PNG, JPG, JPEG, PDF only. File size should be up to 6MB.
+                    </p>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-4">
+                            <label for="vehicle" class="form-label">Vehicle</label>
+                            <input type="file" class="form-control form-control-sm preview-upload" id="vehicle"
+                                name="vehicleimg" accept=".png,.jpg,.jpeg,.pdf">
+                            <div class="mt-2 text-center">
+                                <img id="preview-vehicle" class="border rounded img-fluid d-none" alt="Vehicle Preview"
+                                    style="max-height: 150px;">
+                            </div>
+                            @error('vehicleimg')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label for="rc" class="form-label">RC</label>
+                            <input type="file" class="form-control form-control-sm preview-upload" id="rc"
+                                name="vehiclerc" accept=".png,.jpg,.jpeg,.pdf">
+                            <div class="mt-2 text-center">
+                                <img id="preview-rc" class="border rounded img-fluid d-none" alt="RC Preview"
+                                    style="max-height: 150px;">
+                            </div>
+                            @error('vehiclerc')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label for="device" class="form-label">Device</label>
+                            <input type="file" class="form-control form-control-sm preview-upload" id="device"
+                                name="vaicledeviceimg" accept=".png,.jpg,.jpeg,.pdf">
+                            <div class="mt-2 text-center">
+                                <img id="preview-device" class="border rounded img-fluid d-none" alt="Device Preview"
+                                    style="max-height: 150px;">
+                            </div>
+                            @error('vaicledeviceimg')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-4">
+                            <label for="pan" class="form-label">Pan Card</label>
+                            <input type="file" class="form-control form-control-sm preview-upload" id="pan"
+                                name="pancardimg" accept=".png,.jpg,.jpeg,.pdf">
+                            <div class="mt-2 text-center">
+                                <img id="preview-pan" class="border rounded img-fluid d-none" alt="Pan Card Preview"
+                                    style="max-height: 150px;">
+                            </div>
+                            @error('pancardimg')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label for="aadhaar" class="form-label">Aadhaar Card</label>
+                            <input type="file" class="form-control form-control-sm preview-upload" id="aadhaar"
+                                name="aadharcardimg" accept=".png,.jpg,.jpeg,.pdf">
+                            <div class="mt-2 text-center">
+                                <img id="preview-aadhaar" class="border rounded img-fluid d-none"
+                                    alt="Aadhaar Card Preview" style="max-height: 150px;">
+                            </div>
+                            @error('aadharcardimg')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label for="invoice" class="form-label">Invoice</label>
+                            <input type="file" class="form-control form-control-sm preview-upload" id="invoice"
+                                name="invoiceimg" accept=".png,.jpg,.jpeg,.pdf">
+                            <div class="mt-2 text-center">
+                                <img id="preview-invoice" class="border rounded img-fluid d-none" alt="Invoice Preview"
+                                    style="max-height: 150px;">
+                            </div>
+                            @error('invoiceimg')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-4">
+                            <label for="signature" class="form-label">Signature</label>
+                            <input type="file" class="form-control form-control-sm preview-upload" id="signature"
+                                name="signatureimg" accept=".png,.jpg,.jpeg,.pdf">
+                            <div class="mt-2 text-center">
+                                <img id="preview-signature" class="border rounded img-fluid d-none"
+                                    alt="Signature Preview" style="max-height: 150px;">
+                            </div>
+                            @error('signatureimg')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label for="panic" class="form-label">Panic Button with Sticker</label>
+                            <input type="file" class="form-control form-control-sm preview-upload" id="panic"
+                                name="panicbuttonimg" accept=".png,.jpg,.jpeg,.pdf">
+                            <div class="mt-2 text-center">
+                                <img id="preview-panic" class="border rounded img-fluid d-none"
+                                    alt="Panic Button Preview" style="max-height: 150px;">
+                            </div>
+                            @error('panicbuttonimg')
+                                <div class="d-block invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="my-2 text-center">
+                <button type="submit" class="btn" style="background-color: #260950;color:#fff">Submit</button>
+                <button type="reset" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+
+
+    <style>
+        .form-floating {
+            position: relative;
+        }
+
+        .form-floating label {
+            transition: all 0.2s ease;
+        }
+
+        .form-control {
+            border-radius: 0.375rem;
+            border: 1px solid #dee2e6;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .form-control.bg-light {
+            background-color: #f8f9fa !important;
+        }
+
+        .invalid-feedback {
+            margin-top: 0.25rem;
+        }
+    </style>
+    <script>
+        document.querySelectorAll('.preview-upload').forEach(input => {
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                const previewId = `preview-${this.id}`;
+                const previewElement = document.getElementById(previewId);
+
+                if (file) {
+                    const fileType = file.type;
+
+                    if (fileType.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewElement.src = e.target.result;
+                            previewElement.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    } else if (fileType === 'application/pdf') {
+                        previewElement.src = 'path/to/pdf-icon.png'; // Use a placeholder PDF icon
+                        previewElement.classList.remove('d-none');
+                    } else {
+                        alert('Unsupported file type!');
+                        this.value = ''; // Clear invalid file
+                        previewElement.classList.add('d-none');
+                    }
+                } else {
+                    previewElement.classList.add('d-none');
+                }
+            });
+        });
+    </script>
+    {{-- <script>
+        $(document).ready(function() {
+            $('.state').change(function() {
+                $('.distributor').empty();
+                $('.distributor').append('<option value="null">Select distributer</option>');
+                const state = $(this).val();
+                //alert(state);
+                if (state) {
+                    $.ajax({
+                        url: `/manufacturer/fetch/distributer/${state}`,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            //alert(JSON.stringify(data));
+                            data.forEach(distributer => {
+                                $(`.distributor`).append(
+                                    `
+                                                                                                                                                                    <option value="${distributer.id}">${distributer.business_name}</option>
+                                                                                                                                                                    `
+                                );
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    </script> --}}
+
+    {{-- <script>
+        $(document).ready(function() {
+            $('.distributor').change(function() {
+                $('.dealer').empty(); // Clear existing options in the dealer dropdown
+                $('.dealer').append('<option disabled selected>Select dealer</option>');
+                const distributer_id = $(this).val(); // Get the selected distributor ID
+                if (distributer_id) { // Ensure a valid distributor ID is selected
+                    $.ajax({
+                        url: `/fetch/dealer/${distributer_id}`, // API endpoint
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            // Check if data is an array and populate dealer dropdown
+                            if (Array.isArray(data) && data.length > 0) {
+                                data.forEach(dealer => {
+                                    $('.dealer').append(
+                                        `
+                                                                                                                                                                                        <option value="${dealer.id}" country="${dealer.country}" state="${dealer.state}" dis="${dealer.district}" rto="${dealer.rto_devision}" >${dealer.business_name}</option>
+                                                                                                                                                                                    `
+                                    );
+                                });
+                            } else {
+                                alert('No dealers found for the selected distributor.');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX error:', status, error);
+                            alert('Failed to fetch dealers. Please try again.');
+                        }
+                    });
+                } else {
+                    alert('Please select a valid distributor.');
+                }
+            });
+        });
+    </script> --}}
+
+    <script>
+        $(document).ready(function() {
+            $(".Packages").click(function() {
+                // Retrieve the package ID
+                var packageId = $(this).find('.packageId').text();
+
+                console.log("Package Id: " + packageId);
+
+                // Update the hidden input field with the selected package ID
+                $("#subscriptionpackage").val(packageId);
+
+                // Reset the background styles for all packages
+                $(".Packages .card-body").css('background-image', '');
+
+                // Apply the highlight style to the selected package
+                $(this).find('.card-body').css('background-image',
+                    'linear-gradient(90deg, rgba(235, 225, 225, 1) 0%, rgba(87, 199, 133, 1) 50%)');
+            });
+        });
+    </script>
+
+    <script>
+        $('.technician').change(function() {
+            // Get the selected option element
+            const selectedOption = $(this).find('option:selected');
+
+            // Get the value of the selected option
+            const technician = $(this).val();
+
+            // Get the custom attribute (mobile) of the selected option
+            const mobile = selectedOption.attr('mobile');
+            const name = selectedOption.attr('name');
+            const email = selectedOption.attr('email');
+
+            // Show alerts
+
+            $('#technician_name').val(name);
+            $('#technician_mobile').val(mobile);
+            $('#technician_email').val(email);
+
+        });
+    </script>
+    {{-- <script>
+        $('.deviceno').change(function() {
+            const deviceNo = $(this).val();
+            // alert(deviceNo);
+            if (deviceNo) {
+                $.ajax({
+                    url: `/manufacturer/fetch/simInfoByBarcode/${deviceNo}`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data) {
+                            alert(JSON.stringify(data))
+                            data.forEach(sim_info => {
+                                $('.simInfo').append(
+                                    ` 
+                                                                                                                                                                                                    <div class="py-2 row">
+                                                                                                                                                                                                      <div class="col-md-3">
+                                                                                                                                                                                                        <label>Sim No.</label>
+                                                                                                                                                                                                        <input class="form-control form-control-sm" value="${sim_info.simNo}">
+                                                                                                                                                                                                        </div> 
+                                                                                                                                                                                                         <div class="col-md-3">
+                                                                                                                                                                                                             <label>ICCID No.</label>
+                                                                                                                                                                                                             <input class="form-control form-control-sm" value="${sim_info.ICCIDNo}">
+                                                                                                                                                                                                        </div> 
+                                                                                                                                                                                                         <div class="col-md-3">
+                                                                                                                                                                                                             <label>Validity</label>
+                                                                                                                                                                                                             <input class="form-control form-control-sm" value="${sim_info.validity}">
+                                                                                                                                                                                                        </div> 
+                                                                                                                                                                                                        <div class="col-md-3">
+                                                                                                                                                                                                            <label>Operator</label>
+                                                                                                                                                                                                            <input class="form-control form-control-sm" value="${sim_info.operator}">
+                                                                                                                                                                                                        </div>  
+                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                    `
+                                )
+                            });
+
+                        } else {
+
+                            alert('No data available')
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle AJAX error
+                        console.error('AJAX request failed:', status, error);
+
+                        alert('Error fetching data')
+                    }
+                });
+            } else {
+                $('.deviceno').empty().append('<option value="null">Please select a device first</option>');
+            }
+
+        });
+    </script> --}}
+
+    <script>
+        // Define the districts object globally, so both event handlers can access it
+        let districts = {
+            "Andhra Pradesh": ['Chittoor', 'East Godavari', 'Guntur', 'Krishna', 'Kurnool', 'Nellore', 'Prakasam',
+                'Srikakulam'
+            ],
+            "Maharashtra": ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik', 'Solapur', 'Satara'],
+            "Tamil Nadu": ['Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Trichy', 'Erode'],
+            "Odisha": ["Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Debagarh",
+                "Dhenkanal", "Gajapati",
+                "Ganjam", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara",
+                "Kendujhar", "Khordha",
+                "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada",
+                "Sambalpur",
+                "Subarnapur", "Sundargarh"
+            ]
+        };
+
+        // Handle country selection
+        $('.customer-country').on('change', function() {
+            $('.customer-state').empty();
+            $('.customer-district').empty(); // Clear the district dropdown when country changes
+            let value = this.value;
+
+            // Define states for different countries
+            let china = ['Beijing'];
+            let india = ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat',
+                'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Maharashtra',
+                'Madhya Pradesh', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+                'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Tripura', 'Telangana', 'Uttar Pradesh', 'Uttarakhand',
+                'West Bengal', 'Andaman & Nicobar (UT)', 'Chandigarh (UT)',
+                'Dadra & Nagar Haveli and Daman & Diu (UT)', 'Delhi [National Capital Territory (NCT)]',
+                'Jammu & Kashmir (UT)', 'Ladakh (UT)', 'Lakshadweep (UT)', 'Puducherry (UT)'
+            ];
+
+            // Append states to the state dropdown based on the selected country
+            switch (value) {
+                case "china":
+                    for (let state of china) {
+                        $('.customer-state').append($('<option>', {
+                            value: state,
+                            text: state
+                        }));
+                    }
+                    break;
+                case "india":
+                    for (let state of india) {
+                        $('.customer-state').append($('<option>', {
+                            value: state,
+                            text: state
+                        }));
+                    }
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        // Handle state selection to populate districts
+        $('.customer-state').on('change', function() {
+            $('.customer-district').empty(); // Clear existing districts
+            let selectedState = this.value;
+
+            // Check if the selected state has predefined districts
+            let districtList = districts[selectedState] || [];
+
+            if (districtList.length > 0) {
+                for (let district of districtList) {
+                    $('.customer-district').append($('<option>', {
+                        value: district,
+                        text: district
+                    }));
+                }
+            } else {
+                $('.customer-district').append($('<option>', {
+                    value: "",
+                    text: "No districts available"
+                }));
+            }
+        });
+    </script>
+
+    <script>
+        function handleCheckboxSelection(checkbox) {
+            // Get all checkboxes in the table
+            var checkboxes = document.querySelectorAll('.form-check-input');
+
+            // Loop through all checkboxes
+            checkboxes.forEach(function(item) {
+                // If the current checkbox is not the one being clicked, uncheck it
+                if (item !== checkbox) {
+                    item.checked = false;
+                }
+            });
+
+            // Get the value of the selected checkbox
+            var selectedValue = checkbox.value;
+            var selectedId = checkbox.id;
+
+            // Check if selectedValue is null or empty
+            if (!selectedValue || !selectedId) {
+                alert("Please select a device first.");
+            } else {
+                alert("Selected Device: " + selectedValue);
+                $('#deviceId').val(selectedId); // Assuming this is an input field
+                $('#documents').attr('href', `/map-device/documents/${selectedId}`);
+                $('#edit').attr('href', `/map-device/edit/${selectedId}`);
+                $('#dataLog').attr('href', `/map-device/data-log/${selectedValue}`);
+                $('#liveTracking').attr('href', `device/location/view/${selectedValue}`);
+            }
+        }
+    </script>
+
+
+    <script>
+        $(document).ready(function() {
+            function fetchCustomerData(endpoint, value) {
+                $.ajax({
+                    url: endpoint, // URL of your API or route
+                    method: 'GET',
+                    data: {
+                        query: value
+                    }, // Send the value (email or mobile) to the server
+                    success: function(response) {
+                        if (response.success) {
+                            // Populate the form fields with the returned customer data
+                            $("#customerName").val(response.data.customer_name).prop('readonly', true);
+                            $("#email").val(response.data.customer_email).prop('readonly', true);
+                            $("#mobile").val(response.data.customer_mobile).prop('readonly', true);
+                            $("#gstin").val(response.data.gstin).prop('readonly', true);
+                            $("#country").val(response.data.country).prop('readonly', true);
+                            $("#state").val(response.data.state).prop('readonly', true);
+                            $("#district").val(response.data.district).prop('readonly', true);
+                            // $("#rto_division").val(response.data.rtoDivision); // Uncomment if needed
+                            $("#pincode").val(response.data.pincode).prop('readonly', true);
+                            $("#address").val(response.data.address).prop('readonly', true);
+                            $("#aadhaar").val(response.data.aadhaar).prop('readonly', true);
+                            $("#panNo").val(response.data.pan).prop('readonly', true);
+                        } else {
+                            alert(response.message ||
+                                "Customer not found! Please enter the details manually.");
+                            // Allow manual input for all fields
+                            enableManualEntry();
+                        }
+                    },
+                    error: function() {
+                        alert("Error fetching customer data. Please enter the details manually.");
+                        // Allow manual input for all fields
+                        enableManualEntry();
+                    }
+                });
+            }
+
+            function enableManualEntry() {
+                // Make all fields editable
+                $("#customerName").prop('readonly', false);
+                $("#email").prop('readonly', false);
+                $("#mobile").prop('readonly', false);
+                $("#gstin").prop('readonly', false);
+                $("#country").prop('readonly', false);
+                $("#state").prop('readonly', false);
+                $("#district").prop('readonly', false);
+                // $("#rto_division").prop('readonly', false); // Uncomment if needed
+                $("#pincode").prop('readonly', false);
+                $("#address").prop('readonly', false);
+                $("#aadhaar").prop('readonly', false);
+                $("#panNo").prop('readonly', false);
+            }
+
+            // Trigger AJAX call when email input loses focus
+            $("#email").blur(function() {
+                const email = $(this).val();
+                if (email) {
+                    fetchCustomerData('/manufacturer/fetch-customer-by-email',
+                        email); // Replace with your API endpoint
+                }
+            });
+
+            // Trigger AJAX call when mobile input loses focus
+            $("#mobile").blur(function() {
+                const mobile = $(this).val();
+                if (mobile) {
+                    fetchCustomerData('/manufacturer/fetch-customer-by-mobile',
+                        mobile); // Replace with your API endpoint
+                }
+            });
+        });
+    </script>
+@endsection

@@ -1,0 +1,704 @@
+@extends($layout)
+@section('content')
+    <div class="align-items-center row"
+        style="background: linear-gradient(135deg, #2a0b5a 0%, #1a0638 100%); padding: 12px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <div class="col-md-6">
+            <div class="d-flex align-items-center">
+                <i class="me-3 text-white fas fa-map-marked-alt fs-4"></i>
+                <h4 class="mb-0 text-white card-title" style="font-weight: 600; letter-spacing: 0.5px;">Manage Map Devices
+                </h4>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex justify-content-md-end justify-content-sm-start">
+                <button type="button" class="d-flex align-items-center px-4 py-2 btn btn-theme"
+                    style=" 
+                                                                                                                                                           border-radius: 6px;
+                                                                                                                                                           font-weight: 500;
+                                                                                                                                                           letter-spacing: 0.5px;
+                                                                                                                                                           box-shadow: 0 2px 8px rgba(106, 17, 203, 0.3);
+                                                                                                                                                           transition: all 0.3s ease;"
+                    data-bs-toggle="modal" data-bs-target="#mapDevice"
+                    onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(106, 17, 203, 0.4)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(106, 17, 203, 0.3)'">
+                    <i class="me-2 fas fa-plus-circle"></i>
+                    Map New Device
+                </button>
+            </div>
+        </div>
+    </div>
+    @if (Session::has('success'))
+        <div class="my-2 alert alert-success alert-dismissible fade show" role="alert">
+            <strong> {{ Session::get('success') }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if (Session::has('error'))
+        <div class="my-2 alert alert-danger alert-dismissible fade show" role="alert">
+            <strong> {{ Session::get('error') }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    <div
+        class="d-flex flex-column flex-md-row align-items-md-center justify-content-between bg-light shadow-sm my-2 mb-4 p-3 rounded-3">
+        <!-- Title Section -->
+        <div class="mb-3 mb-md-0">
+            <h5 class="mb-0 text-primary fw-semibold">
+                <i class="me-2 fas fa-map-marked-alt"></i>Mapped Devices List
+            </h5>
+            <p class="mt-1 mb-0 text-muted small">Showing all mapped devices in your network</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex flex-wrap gap-2">
+            <a href="" type="button"
+                class="d-flex align-items-center gap-2 px-3 py-2 btn-outline-primary btn action-btn" id="edit">
+                <i class="fas fa-file-pen"></i>
+                <span>Edit</span>
+            </a>
+
+            <a href="" type="button" class="d-flex align-items-center gap-2 px-3 py-2 btn-outline-info btn action-btn"
+                id="view">
+                <i class="fas fa-eye"></i>
+                <span>View</span>
+        </a>
+
+            <button type="button" class="d-flex align-items-center gap-2 px-3 py-2 btn-outline-success btn action-btn"
+                data-bs-toggle="modal" data-bs-target="#certificates">
+                <i class="fas fa-file-signature"></i>
+                <span>Certificates</span>
+            </button>
+
+            <a href="" type="button"
+                class="d-flex align-items-center gap-2 px-3 py-2 btn-outline-success btn action-btn" id="documents">
+                <i class="fas fa-file-lines"></i>
+                <span>Documents</span>
+            </a>
+
+            <a href="" type="button" class="px-3 py-2 btn-outline-info btn action-btn" id="dataLog">
+                <i class="fas fa-file-lines"></i>
+                <span>Data Log</span>
+            </a>
+            <a href="" type="button" class="px-3 py-2 btn-outline-info btn action-btn" id="liveTracking">
+                <i class="fas fa-file-lines"></i>
+                <span>Live Tracking</span>
+            </a>
+        </div>
+    </div>
+
+    <style>
+        .action-btn {
+            transition: all 0.2s ease;
+            border-radius: 8px;
+            border-width: 2px;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn i {
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .action-btn {
+                padding: 0.5rem 1rem !important;
+                font-size: 0.85rem;
+            }
+
+            .action-btn i {
+                margin-right: 0.3rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .d-flex.flex-wrap {
+                gap: 0.5rem !important;
+                width: 100%;
+            }
+
+            .action-btn {
+                flex: 1 1 45%;
+                min-width: 120px;
+                justify-content: center;
+            }
+        }
+    </style>
+    <div class="my-2 row">
+        <div class="col-md-12">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Info</th>
+                        <th>Device No</th>
+                        <th>Sim Details</th>
+                        <th>State/Division</th>
+                        <th>Vehicle Detail</th>
+                        <th>Dealer(Technician)</th>
+                        <th>Customer Name</th>
+                        <th>Customer Mobile</th>
+                        <th>Customer Email
+                        <th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($mapDevices as $item)
+                        <tr>
+                            <td>
+                                {{-- <div class="form-check"> --}}
+                                <!-- Checkbox inside table cell with proper class -->
+                                <input class="form-check-input ms-1 pb-2" type="checkbox"
+                                    value="{{ $item->barcodes->IMEINO }}" id="{{ $item->id }}"
+                                    onchange="handleCheckboxSelection(this)">
+                                {{--
+                                </div> --}}
+                            </td>
+                            <td><a href="" class="btn" style="background-color: #260950;color:#fff">Info</a></td>
+                            <td><strong>{{ $item->barcodes->IMEINO }}
+                                    {{ $item->barcodes->serialNumber }}
+                                </strong></td>
+                            <td>
+                                @php
+                                    $sim = App\Models\Sim::where('barcode_id', $item->device_seriel_no)->get();
+                                @endphp
+                                @foreach ($sim as $simdata)
+                                    {{ $simdata->simNo }}
+                                @endforeach
+                                {{-- {{$item->device_seriel_no}} --}}
+                            </td>
+                            <td>{{ $item->cusmtomer->customer_state ?? 'N/A' }} /
+                                {{ $item->cusmtomer->customer_rto_division ?? 'N/A' }}
+                            </td>
+                            <td>{{ $item->vehicle_registration_number }}</td>
+                            <td>{{ $item->dealer->business_name }}</td>
+                            <td>{{ $item->cusmtomer->customer_name }}</td>
+                            <td>{{ $item->cusmtomer->customer_mobile }}</td>
+                            <td>{{ $item->cusmtomer->customer_email }}
+                            <td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            {{ $mapDevices->links('pagination::bootstrap-5') }}
+
+        </div>
+    </div>
+
+
+
+    {{-- Modal Map Device --}}
+    @include('backend.device.partials.modal_map_device')
+
+    <!-- Modal Certificates -->
+    @include('backend.device.partials.modal_certificates')
+
+
+    <style>
+        .form-floating {
+            position: relative;
+        }
+
+        .form-floating label {
+            transition: all 0.2s ease;
+        }
+
+        .form-control {
+            border-radius: 0.375rem;
+            border: 1px solid #dee2e6;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .form-control.bg-light {
+            background-color: #f8f9fa !important;
+        }
+
+        .invalid-feedback {
+            margin-top: 0.25rem;
+        }
+    </style>
+    <script>
+        document.querySelectorAll('.preview-upload').forEach(input => {
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                const previewId = `preview-${this.id}`;
+                const previewElement = document.getElementById(previewId);
+
+                if (file) {
+                    const fileType = file.type;
+
+                    if (fileType.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewElement.src = e.target.result;
+                            previewElement.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    } else if (fileType === 'application/pdf') {
+                        previewElement.src = 'path/to/pdf-icon.png'; // Use a placeholder PDF icon
+                        previewElement.classList.remove('d-none');
+                    } else {
+                        alert('Unsupported file type!');
+                        this.value = ''; // Clear invalid file
+                        previewElement.classList.add('d-none');
+                    }
+                } else {
+                    previewElement.classList.add('d-none');
+                }
+            });
+        });
+    </script>
+    {{-- <script>
+        $(document).ready(function() {
+            $('.state').change(function() {
+                $('.distributor').empty();
+                $('.distributor').append('<option value="null">Select distributer</option>');
+                const state = $(this).val();
+                //alert(state);
+                if (state) {
+                    $.ajax({
+                        url: `/manufacturer/fetch/distributer/${state}`,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            //alert(JSON.stringify(data));
+                            data.forEach(distributer => {
+                                $(`.distributor`).append(
+                                    `
+                                                                                                                                                                    <option value="${distributer.id}">${distributer.business_name}</option>
+                                                                                                                                                                    `
+                                );
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    </script> --}}
+
+    {{-- <script>
+        $(document).ready(function() {
+            $('.distributor').change(function() {
+                $('.dealer').empty(); // Clear existing options in the dealer dropdown
+                $('.dealer').append('<option disabled selected>Select dealer</option>');
+                const distributer_id = $(this).val(); // Get the selected distributor ID
+                if (distributer_id) { // Ensure a valid distributor ID is selected
+                    $.ajax({
+                        url: `/fetch/dealer/${distributer_id}`, // API endpoint
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            // Check if data is an array and populate dealer dropdown
+                            if (Array.isArray(data) && data.length > 0) {
+                                data.forEach(dealer => {
+                                    $('.dealer').append(
+                                        `
+                                                                                                                                                                                        <option value="${dealer.id}" country="${dealer.country}" state="${dealer.state}" dis="${dealer.district}" rto="${dealer.rto_devision}" >${dealer.business_name}</option>
+                                                                                                                                                                                    `
+                                    );
+                                });
+                            } else {
+                                alert('No dealers found for the selected distributor.');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX error:', status, error);
+                            alert('Failed to fetch dealers. Please try again.');
+                        }
+                    });
+                } else {
+                    alert('Please select a valid distributor.');
+                }
+            });
+        });
+    </script> --}}
+
+    <script>
+        $(document).ready(function() {
+            $(".Packages").click(function() {
+                // Retrieve the package ID
+                var packageId = $(this).find('.packageId').text();
+
+                console.log("Package Id: " + packageId);
+
+                // Update the hidden input field with the selected package ID
+                $("#subscriptionpackage").val(packageId);
+
+                // Reset the background styles for all packages
+                $(".Packages .card-body").css('background-image', '');
+
+                // Apply the highlight style to the selected package
+                $(this).find('.card-body').css('background-image',
+                    'linear-gradient(90deg, rgba(235, 225, 225, 1) 0%, rgba(87, 199, 133, 1) 50%)');
+            });
+        });
+    </script>
+    {{-- <script>
+        $('.dealer').change(function() {
+            alert('ok');
+            const value = $(this).find("option:selected");
+            const dealer = $(this).val();
+            const state = value.attr("state");
+            const country = value.attr("country");
+            const capitalizedCountry = country.replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize
+            const dis = value.attr('dis')
+            const rto = value.attr("rto"); // Example: "MH12,MH13,MH14"
+            const rtoArray = rto.split(","); // Split the string into an array
+
+            // Append each RTO value to the dropdown
+            rtoArray.forEach((rtoItem) => {
+                // alert('rto' + rtoItem)
+                $('#rto_division').append(`<option value="${rtoItem}">${rtoItem}</option>`);
+            });
+
+            $('#state').val(state);
+            $('#country').val(capitalizedCountry);
+            $('#district').val(dis);
+
+            // alert(typeof ( ))
+            // alert(state);
+            // alert(dealer);
+            // alert(rto);
+            if (dealer) {
+                $.ajax({
+                    url: `/fetch/device-by-dealer/${dealer}`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        // alert(JSON.stringify(data))
+                        //Validate response
+                        if (Array.isArray(data) && data.length > 0) {
+                            // Populate distributors
+                            $('.deviceno').empty().append(
+                                '<option value="null">Select Device No</option>');
+                            data.forEach(device => {
+                                $('.deviceno').append(
+                                    `
+                                                                                                                                                                                                <option value="${device.barcode.id}">${device.barcode.IMEINO}</option>
+                                                                                                                                                                                            `
+                                );
+                            });
+                        } else {
+                            // No distributors found
+                            $('.deviceno').empty().append(
+                                '<option value="null">No Device Found</option>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle errors
+                        $('.deviceno').empty().append(
+                            '<option value="null">Error Loading Device</option>');
+                        console.error(`Error: ${error}, Status: ${status}`);
+                    }
+                });
+                $.ajax({
+                    url: `/fetch/technician/${dealer}`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        // alert(JSON.stringify(data));
+                        if (Array.isArray(data) && data.length > 0) {
+                            // Populate distributors
+                            $('.technician').empty().append(
+                                '<option value="null">Select Technician No</option>');
+                            data.forEach(technician => {
+                                $('.technician').append(
+                                    `
+                                                                                                                                                                                                <option value="${technician.id}" name="${technician.name}" email="${technician.email}" mobile="${technician.mobile}">${technician.name}</option>
+                                                                                                                                                                                            `
+                                );
+                            });
+                        } else {
+                            // No distributors found
+                            $('.deviceno').empty().append(
+                                '<option value="null">No Device Found</option>');
+                        }
+                    }
+                });
+
+
+            }
+        });
+    </script> --}}
+    <script>
+        $('.technician').change(function() {
+            // Get the selected option element
+            const selectedOption = $(this).find('option:selected');
+
+            // Get the value of the selected option
+            const technician = $(this).val();
+
+            // Get the custom attribute (mobile) of the selected option
+            const mobile = selectedOption.attr('mobile');
+            const name = selectedOption.attr('name');
+            const email = selectedOption.attr('email');
+
+            // Show alerts
+
+            $('#technician_name').val(name);
+            $('#technician_mobile').val(mobile);
+            $('#technician_email').val(email);
+
+        });
+    </script>
+    {{-- <script>
+        $('.deviceno').change(function() {
+            const deviceNo = $(this).val();
+            // alert(deviceNo);
+            if (deviceNo) {
+                $.ajax({
+                    url: `/manufacturer/fetch/simInfoByBarcode/${deviceNo}`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data) {
+                            alert(JSON.stringify(data))
+                            data.forEach(sim_info => {
+                                $('.simInfo').append(
+                                    ` 
+                                                                                                                                                                                                    <div class="py-2 row">
+                                                                                                                                                                                                      <div class="col-md-3">
+                                                                                                                                                                                                        <label>Sim No.</label>
+                                                                                                                                                                                                        <input class="form-control form-control-sm" value="${sim_info.simNo}">
+                                                                                                                                                                                                        </div> 
+                                                                                                                                                                                                         <div class="col-md-3">
+                                                                                                                                                                                                             <label>ICCID No.</label>
+                                                                                                                                                                                                             <input class="form-control form-control-sm" value="${sim_info.ICCIDNo}">
+                                                                                                                                                                                                        </div> 
+                                                                                                                                                                                                         <div class="col-md-3">
+                                                                                                                                                                                                             <label>Validity</label>
+                                                                                                                                                                                                             <input class="form-control form-control-sm" value="${sim_info.validity}">
+                                                                                                                                                                                                        </div> 
+                                                                                                                                                                                                        <div class="col-md-3">
+                                                                                                                                                                                                            <label>Operator</label>
+                                                                                                                                                                                                            <input class="form-control form-control-sm" value="${sim_info.operator}">
+                                                                                                                                                                                                        </div>  
+                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                    `
+                                )
+                            });
+                            // Example: populate a select dropdown with the returned data
+                            // var options = data.options.map(function(option) {
+                            //     return `<option value="${option.value}">${option.label}</option>`;
+                            // }).join('');
+                            // $('.deviceno').html(options);
+                        } else {
+                            // Handle failure or empty data scenario
+                            // $('.deviceno').empty().append(
+                            //     '<option value="null">No data available</option>');
+                            alert('No data available')
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle AJAX error
+                        console.error('AJAX request failed:', status, error);
+                        // $('.deviceno').empty().append(
+                        //     '<option value="null">Error fetching data</option>');
+                        alert('Error fetching data')
+                    }
+                });
+            } else {
+                $('.deviceno').empty().append('<option value="null">Please select a device first</option>');
+            }
+
+        });
+    </script> --}}
+
+    <script>
+        // Define the districts object globally, so both event handlers can access it
+        let districts = {
+            "Andhra Pradesh": ['Chittoor', 'East Godavari', 'Guntur', 'Krishna', 'Kurnool', 'Nellore', 'Prakasam',
+                'Srikakulam'
+            ],
+            "Maharashtra": ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik', 'Solapur', 'Satara'],
+            "Tamil Nadu": ['Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Trichy', 'Erode'],
+            "Odisha": ["Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Debagarh",
+                "Dhenkanal", "Gajapati",
+                "Ganjam", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara",
+                "Kendujhar", "Khordha",
+                "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada",
+                "Sambalpur",
+                "Subarnapur", "Sundargarh"
+            ]
+        };
+
+        // Handle country selection
+        $('.customer-country').on('change', function() {
+            $('.customer-state').empty();
+            $('.customer-district').empty(); // Clear the district dropdown when country changes
+            let value = this.value;
+
+            // Define states for different countries
+            let china = ['Beijing'];
+            let india = ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat',
+                'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Maharashtra',
+                'Madhya Pradesh', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+                'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Tripura', 'Telangana', 'Uttar Pradesh', 'Uttarakhand',
+                'West Bengal', 'Andaman & Nicobar (UT)', 'Chandigarh (UT)',
+                'Dadra & Nagar Haveli and Daman & Diu (UT)', 'Delhi [National Capital Territory (NCT)]',
+                'Jammu & Kashmir (UT)', 'Ladakh (UT)', 'Lakshadweep (UT)', 'Puducherry (UT)'
+            ];
+
+            // Append states to the state dropdown based on the selected country
+            switch (value) {
+                case "china":
+                    for (let state of china) {
+                        $('.customer-state').append($('<option>', {
+                            value: state,
+                            text: state
+                        }));
+                    }
+                    break;
+                case "india":
+                    for (let state of india) {
+                        $('.customer-state').append($('<option>', {
+                            value: state,
+                            text: state
+                        }));
+                    }
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        // Handle state selection to populate districts
+        $('.customer-state').on('change', function() {
+            $('.customer-district').empty(); // Clear existing districts
+            let selectedState = this.value;
+
+            // Check if the selected state has predefined districts
+            let districtList = districts[selectedState] || [];
+
+            if (districtList.length > 0) {
+                for (let district of districtList) {
+                    $('.customer-district').append($('<option>', {
+                        value: district,
+                        text: district
+                    }));
+                }
+            } else {
+                $('.customer-district').append($('<option>', {
+                    value: "",
+                    text: "No districts available"
+                }));
+            }
+        });
+    </script>
+
+    <script>
+        function handleCheckboxSelection(checkbox) {
+            // Get all checkboxes in the table
+            var checkboxes = document.querySelectorAll('.form-check-input');
+
+            // Loop through all checkboxes
+            checkboxes.forEach(function(item) {
+                // If the current checkbox is not the one being clicked, uncheck it
+                if (item !== checkbox) {
+                    item.checked = false;
+                }
+            });
+
+            // Get the value of the selected checkbox
+            var selectedValue = checkbox.value;
+            var selectedId = checkbox.id;
+
+            // Check if selectedValue is null or empty
+            if (!selectedValue || !selectedId) {
+                alert("Please select a device first.");
+            } else {
+                alert("Selected Device: " + selectedValue);
+                $('#deviceId').val(selectedId); // Assuming this is an input field
+                $('#documents').attr('href', `/map-device/documents/${selectedId}`);
+                $('#edit').attr('href', `/map-device/edit/${selectedId}`);
+                $('#view').attr('href', `/map-device/view/${selectedId}`);
+                $('#dataLog').attr('href', `/map-device/data-log/${selectedValue}`);
+                $('#liveTracking').attr('href', `device/location/view/${selectedValue}`);
+            }
+        }
+    </script>
+
+
+    <script>
+        $(document).ready(function() {
+            function fetchCustomerData(endpoint, value) {
+                $.ajax({
+                    url: endpoint, // URL of your API or route
+                    method: 'GET',
+                    data: {
+                        query: value
+                    }, // Send the value (email or mobile) to the server
+                    success: function(response) {
+                        if (response.success) {
+                            // Populate the form fields with the returned customer data
+                            $("#customerName").val(response.data.customer_name).prop('readonly', true);
+                            $("#email").val(response.data.customer_email).prop('readonly', true);
+                            $("#mobile").val(response.data.customer_mobile).prop('readonly', true);
+                            $("#gstin").val(response.data.gstin).prop('readonly', true);
+                            $("#country").val(response.data.country).prop('readonly', true);
+                            $("#state").val(response.data.state).prop('readonly', true);
+                            $("#district").val(response.data.district).prop('readonly', true);
+                            // $("#rto_division").val(response.data.rtoDivision); // Uncomment if needed
+                            $("#pincode").val(response.data.pincode).prop('readonly', true);
+                            $("#address").val(response.data.address).prop('readonly', true);
+                            $("#aadhaar").val(response.data.aadhaar).prop('readonly', true);
+                            $("#panNo").val(response.data.pan).prop('readonly', true);
+                        } else {
+                            alert(response.message ||
+                                "Customer not found! Please enter the details manually.");
+                            // Allow manual input for all fields
+                            enableManualEntry();
+                        }
+                    },
+                    error: function() {
+                        alert("Error fetching customer data. Please enter the details manually.");
+                        // Allow manual input for all fields
+                        enableManualEntry();
+                    }
+                });
+            }
+
+            function enableManualEntry() {
+                // Make all fields editable
+                $("#customerName").prop('readonly', false);
+                $("#email").prop('readonly', false);
+                $("#mobile").prop('readonly', false);
+                $("#gstin").prop('readonly', false);
+                $("#country").prop('readonly', false);
+                $("#state").prop('readonly', false);
+                $("#district").prop('readonly', false);
+                // $("#rto_division").prop('readonly', false); // Uncomment if needed
+                $("#pincode").prop('readonly', false);
+                $("#address").prop('readonly', false);
+                $("#aadhaar").prop('readonly', false);
+                $("#panNo").prop('readonly', false);
+            }
+
+            // Trigger AJAX call when email input loses focus
+            $("#email").blur(function() {
+                const email = $(this).val();
+                if (email) {
+                    fetchCustomerData('/manufacturer/fetch-customer-by-email',
+                        email); // Replace with your API endpoint
+                }
+            });
+
+            // Trigger AJAX call when mobile input loses focus
+            $("#mobile").blur(function() {
+                const mobile = $(this).val();
+                if (mobile) {
+                    fetchCustomerData('/manufacturer/fetch-customer-by-mobile',
+                        mobile); // Replace with your API endpoint
+                }
+            });
+        });
+    </script>
+@endsection
