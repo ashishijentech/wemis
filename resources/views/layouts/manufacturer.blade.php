@@ -437,7 +437,7 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item d-flex align-items-center" href="#">
+                                        <a class="dropdown-item d-flex align-items-center" href="{{route('manufacturer.dashboard.monitoring')}}">
                                             <i class="me-2 fas fa-times-circle"></i>
                                             <span>Monitoring Dashboard</span>
                                         </a>

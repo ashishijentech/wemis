@@ -103,6 +103,43 @@
                 </div>
             </div>
         </div>
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-search me-2"></i> Search Barcode
+                </h6>
+            </div>
+            <div class="card-body">
+                <form action="{{-- route('barcode.search') --}}" method="GET" class="row g-3">
+                    @csrf
+
+                    <!-- Device Serial No -->
+                    <div class="col-md-5">
+                        <label for="serialNo" class="form-label">Device Serial No</label>
+                        <input type="text" name="serialNo" id="serialNo" class="form-control"
+                            placeholder="Enter Serial Number" value="{{ request('serialNo') }}">
+                    </div>
+
+                    <!-- Device IMEI -->
+                    <div class="col-md-5">
+                        <label for="imei" class="form-label">Device IMEI</label>
+                        <input type="text" name="imei" id="imei" class="form-control"
+                            placeholder="Enter IMEI Number" value="{{ request('imei') }}">
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2 w-100">
+                            <i class="fas fa-search me-1"></i> Search
+                        </button>
+                        <a href="{{ route('barcode.allocate') }}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-undo me-1"></i> Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
 
         <div class="d-flex justify-content-end align-items-center mb-3">
             <a href="" class="btn btn-warning btn-sm me-2" id="edit"

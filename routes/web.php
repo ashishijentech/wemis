@@ -188,6 +188,8 @@ Route::middleware(['auth:wlp'])->prefix('wlp')->group(function () {
 
 Route::middleware(['auth:manufacturer'])->prefix('manufacturer')->group(function () {
     Route::get('/dashboard', [DashboardController::class, "manufacturer"])->name('manufacturer.dashboard');
+    Route::get('/monitoring/dashboard', [DashboardController::class, "manufacturer_monitoring"])->name('manufacturer.dashboard.monitoring');
+
     Route::get('/distributors', [DistributorController::class, "index"])->name("distributors");
     Route::post('/distributors/store', [DistributorController::class, "store"])->name("distributor.store");
     Route::delete('/distributors/delete/{id}', [DistributorController::class, "delete"])->name("distributor.delete");
@@ -221,9 +223,12 @@ Route::middleware(['auth:manufacturer'])->prefix('manufacturer')->group(function
     Route::post('/barcode/update/{id}', [BarcodeController::class, 'update'])->name('barcode.update');
     Route::get('/barcode/view/{id}', [BarcodeController::class, 'view'])->name('barcode.view');
     Route::get('/barcode/delete/{id}', [BarCodeController::class, 'delete'])->name('barcode.delete');
+    Route::put('/barcode/rollback', [BarCodeController::class, 'rollback'])->name('barcode.rollback');
     // Route::get('/manufacturer/barcode/list', action: [BarcodeController::class, 'index'])->name('manufacturer.barcode.list');
     Route::get('/allocate/barcode', action: [BarcodeController::class, 'allocate'])->name('barcode.allocate');
     Route::post('/allocate/barcode/store', action: [BarcodeController::class, 'storeAllocate'])->name('barcode.allocate.store');
+    Route::put('/barcode/rollback/{id}', [BarCodeController::class, 'rollback'])->name('barcode.rollback');
+
     Route::get('/download/templete/{filename}', [BarCodeImportController::class, 'download'])->name('barcode.templete.download');
     Route::post('/barcode/import', [BarCodeImportController::class, 'import'])->name('barcode.spreadsheet.import');
 

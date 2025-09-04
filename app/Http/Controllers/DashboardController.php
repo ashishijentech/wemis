@@ -17,7 +17,7 @@ use App\Models\Distributor;
 use App\Models\Dealer;
 use App\Models\Technician;
 use App\Models\BarCode;
-
+use App\Models\ManufacturerElement;
 
 
 class DashboardController extends Controller
@@ -280,5 +280,11 @@ class DashboardController extends Controller
             ->count();
 
         return view('backend.technician.dashboard')->with(compact('totalMappedCount', 'todayMappedCount', 'monthMappedCount'));
+    }
+
+
+    public function manufacturer_monitoring(){
+        $element = ManufacturerElement::with('element')->where('mfg_id',auth('manufacturer')->user()->id)->get();
+        return view('backend.manufacturer.monitring')->with(compact('element'));
     }
 }

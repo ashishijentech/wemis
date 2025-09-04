@@ -40,4 +40,9 @@ class BarCode extends Model
     {
         return $this->belongsTo(MapDeviceDetails::class, 'vehicle_id');
     }
+
+    public function sim():HasMany
+    {
+         return $this->hasMany(Sim::class,'barcode_id','id');
+    }
 }

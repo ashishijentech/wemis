@@ -22,7 +22,14 @@ Route::get('geofences/{imeiNo}', [VehicalController::class,'geofences'])->middle
 
 Route::post('/check-geofence', [VehicalController::class,'checkGeofence'])->middleware('auth:sanctum');
 Route::post('/set-geofences', [VehicalController::class,'setGeoFence'])->middleware('auth:sanctum');
-Route::get('/geofences/{vehicle_registration_number}', [VehicalController::class,'getGeoFence'])->middleware('auth:sanctum');
+Route::get('/geofences/{imeiNo}', [VehicalController::class,'getGeoFence'])->middleware('auth:sanctum');
+Route::get('/geofences',[VehicalController::class,'getGeoFenceAll'])->middleware('auth:sanctum');
 Route::get('/sos-alert/{imeiNo}', [VehicalController::class,'sosAlert'])->middleware('auth:sanctum');
+Route::get('/trip-report/{imei}/{from}/{to}',[VehicalController::class,'tripReport'])->middleware('auth:sanctum');
+Route::get('/distance-report/{imei}/{from}/{to}',[VehicalController::class,'getDistanceReport'])->middleware('auth:sanctum');
+Route::get('/ignition-report/{imei}/{from}/{to}',[VehicalController::class,'getIgnitionReport'])->middleware('auth:sanctum');
+Route::get('/idle-report/{imei}/{from}/{to}',[VehicalController::class,'getIdleReport'])->middleware('auth:sanctum');
+Route::get('/moving-report/{imei}/{from}/{to}',[VehicalController::class,'getMovingReport'])->middleware('auth:sanctum');
+Route::get('/parking-report/{imei}/{from}/{to}',[VehicalController::class,'getParkingReport'])->middleware('auth:sanctum');
 
 Route::post('/login', [LoginController::class,'login']);

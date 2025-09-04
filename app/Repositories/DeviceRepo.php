@@ -92,7 +92,7 @@ class DeviceRepo implements \App\InterFaces\DeviceInterface
     }
 
 
-    /** * Calculate Haversine Distance in KM */ 
+    /** * Calculate Haversine Distance in KM */
     private function haversineGreatCircleDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)
     {
         $latFrom = deg2rad($latitudeFrom);
@@ -105,33 +105,33 @@ class DeviceRepo implements \App\InterFaces\DeviceInterface
         return $angle * $earthRadius;
     }
 
-    
+
     public function routePlayBack($imeiNo, $startDate = null, $endDate = null)
     {
-    // Default to today if no dates are provided
-    $startDate = $startDate ?? today()->startOfDay();
-    $endDate   = $endDate   ?? today()->endOfDay();
+        // Default to today if no dates are provided
+        $startDate = $startDate ?? today()->startOfDay();
+        $endDate   = $endDate   ?? today()->endOfDay();
 
-    $records = GpsData::where('IMEINumber', $imeiNo)
-        ->whereBetween('created_at', [$startDate, $endDate])
-        ->orderBy('created_at')
-        ->get([
-            'latitude',
-            'longitude',
-            'speed',
-            'ignitionStatus',
-            'headDegree',
-            'mainsPowerStatus',
-            'created_at'
-        ]);
+        $records = GpsData::where('IMEINumber', $imeiNo)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at')
+            ->get([
+                'latitude',
+                'longitude',
+                'speed',
+                'ignitionStatus',
+                'headDegree',
+                'mainsPowerStatus',
+                'created_at'
+            ]);
 
-    return [
-        'imeiNo'  => $imeiNo,
-        'from'    => $startDate,
-        'to'      => $endDate,
-        'records' => $records,
-    ];
-   }
+        return [
+            'imeiNo'  => $imeiNo,
+            'from'    => $startDate,
+            'to'      => $endDate,
+            'records' => $records,
+        ];
+    }
 
 
     public function geofences($imeiNo)
@@ -140,5 +140,17 @@ class DeviceRepo implements \App\InterFaces\DeviceInterface
     }
 
 
-    
+    function haversine($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371; // in KM
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLon / 2) * sin($dLon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c; // km
+    }
 }

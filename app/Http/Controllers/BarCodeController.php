@@ -19,7 +19,7 @@ class BarCodeController extends Controller
         // dd(auth('manufacturer')->user()->id);
         $currentTime = Carbon::now()->setTimezone('Asia/Kolkata');
         $batchNo = $currentTime->format('YmdHis');
-        $barCode = BarCode::with('manufacturer', 'element', 'elementType', 'modelNo', 'partNo')->where('mfg_id', auth('manufacturer')->user()->id)->get();
+        $barCode = BarCode::with('manufacturer', 'element', 'elementType', 'modelNo', 'partNo')->where('mfg_id', auth('manufacturer')->user()->id)->orderBy('created_at', 'desc')->get();
         return view("backend.barcode.index")->with(compact('element', 'currentTime', 'batchNo', 'barCode'));
     }
 
@@ -82,7 +82,7 @@ class BarCodeController extends Controller
     public function allocate()
     {
         $element = ManufacturerElement::with('element')->where('mfg_id', auth('manufacturer')->user()->id)->get();
-        $allocatedBarcode = AllocatedBarCode::with('barcode', 'distributor', 'dealer')->where('mfg_id', auth('manufacturer')->user()->id)->get();
+        $allocatedBarcode = AllocatedBarCode::with('barcode', 'distributor', 'dealer')->where('mfg_id', auth('manufacturer')->user()->id)->orderBy('created_at','desc')->get();
         return view("backend.barcode.allocate")->with(compact('element', 'allocatedBarcode'));
     }
 
@@ -155,7 +155,6 @@ class BarCodeController extends Controller
         return view('backend.dealer.allocatedbarcode')->with(compact('barcode'));
     }
 
-    public function rollBack() {}
 
     public function delete($id)
     {
@@ -175,11 +174,10 @@ class BarCodeController extends Controller
     public function edit($id)
     {
         $element = ManufacturerElement::with('element')->where('mfg_id', auth('manufacturer')->user()->id)->get();
-        $barcode = BarCode::with('manufacturer', 'element', 'elementType', 'modelNo', 'partNo')->where('id', $id)->first();
+        $barcode = BarCode::with('manufacturer', 'element', 'elementType', 'modelNo', 'partNo','sim')->where('id', $id)->first();
         $currentTime = Carbon::now()->setTimezone('Asia/Kolkata');
-        $batchNo = $currentTime->format('YmdHis');
         if ($barcode) {
-            return view('backend.barcode.edit')->with(compact('element', 'barcode','batchNo'));
+            return view('backend.barcode.edit')->with(compact('element', 'barcode'));
         } else {
             return redirect()->back()->with('error', 'Barcode Not Found!');
         }
@@ -187,7 +185,18 @@ class BarCodeController extends Controller
 
 
     public function view($id){
-        $data = BarCode::with('manufacturer', 'element', 'elementType', 'modelNo', 'partNo')->where('id', $id)->first();
+       $data = BarCode::with('manufacturer', 'element', 'elementType', 'modelNo', 'partNo')->where('id', $id)->first();
        return view('backend.barcode.view')->with(compact('data'));
+    }
+
+    public function rollback($id){
+     $allocatedBarcode = AllocatedBarCode::find($id);
+     $barcodeId = $allocatedBarcode->barcode_id;
+     $barcode = BarCode::find($barcodeId);
+     $barcode->status = '0';
+     $barcode->save();
+     $allocatedBarcode->delete();
+     return  redirect()->back()->with('success','Barcode Roll Back succesfully!');
+
     }
 }
